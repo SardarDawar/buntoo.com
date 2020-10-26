@@ -1,0 +1,97 @@
+{% extends 'trading/base.html' %}
+
+{% load static %}
+
+{% block main %}
+
+<div class="container">
+  <div class="row">
+    <div class="col-sm-2"></div>
+    
+    <div class="col-sm-8" style="background-color: rgba(38,50,56, 0.7); color: white; padding: 35px;">
+      <fieldset class="form-group">
+        <legend class="border-bottom mb-4">Profile Info</legend>
+      </fieldset>
+      <div class="content-section">
+        <div class="media">
+          <img class="rounded-circle account-img" height="50px" width="auto" src="{{ user_profle.image.url }}" />
+          <div class="media-body">
+            <h2 class="account-heading">&nbsp; {{ user_profle.user.username }}</h2>
+            <p class="text-secondary">{{ user_profle.user.email }}</p>
+          </div>
+        </div>
+      
+        <div class="alert alert-success col-md-6">
+          <h5>{{ user_profle.user.username }}'s Friend List</h5>
+          {% for i in friends %}
+      
+          <div class="  media-body ">
+            <div class="row">
+              <div class="col-md-2">
+                 <a href="{% url 'Userprofile' i.id   %}">{{ i}}</a>
+              </div>
+              <div class="col-md-1">
+                  <button onclick="showChatBox('{{request.user.id }}','{{ i.id }}',true)" class="btn btn-warning m-2 send-message-btn">Send Message</button>
+              </div>
+            </div>
+          </div>
+      
+          {% endfor %}
+        </div>
+        {% for post in posts %}
+          <div class="container" style="background-color: rgba(38,50,56, 0.5);padding: 20px; border: 1px solid gray; color: white;">
+            <div class="row">
+              <div class="col-sm-4">
+                
+                <div class="info-box">
+                  <a href="{% url 'Userprofile' post.author.id   %}">
+                    <img class="rounded-circle pull-left" height="75px" width="auto" src="{{ post.author.profile.image.url }}" alt="Card image cap">
+                  </a>
+                    <center>
+                      <p class="center align-content-center">
+                        <a href="{% url 'Userprofile' post.author.id   %}">
+                          {{post.author}}
+                        </a>
+                      </p>
+                      <p class="center">Last Activity : {{post.time_since_posted}}</p>
+                    </center>
+                </div>
+
+              </div>
+              <div class="col-sm-4">
+                <p>{{ post.title }}</p>
+                {% if post.content%}
+                <p>{{ post.content }}</p>
+                <hr class="hrx" />
+                {% endif%}
+                {% if post.img %}
+                <div class="col-sm-4">
+                    <img src="{{post.img.url}}" style="width: auto;height: 180px;">
+                </div>
+                {% endif %}
+                {% if post.video %}
+                <div class="col-sm-4">
+                    <video width="auto" height="180px" controls>
+                        <source src="{{post.video.url}}">
+                    </video>
+                </div>
+                {% endif %}
+              </div>
+              <div class="col-sm-4"></div>
+            </div>
+          </div>
+          <br />
+    {% endfor %}
+      
+      
+      
+        </form>
+      </div>
+      </div>
+    </div>
+    <div class="col-sm-2"></div>
+  </div>
+</div>
+<script src="{% static 'js/base.js' %}"></script>
+
+{% endblock %}
