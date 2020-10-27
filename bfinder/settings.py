@@ -142,10 +142,10 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
-    {'NAME': 'users.validators.SymbolValidator', 'OPTIONS': {'min_digits': 1, } },
-    {'NAME': 'users.validators.LowercaseValidator', 'OPTIONS': {'min_digits': 8, } },
-    {'NAME': 'users.validators.UppercaseValidator',  'OPTIONS': {'min_digits': 1, } },
-    {'NAME': 'users.validators.NumberValidator', 'OPTIONS': {'min_digits': 1, } },
+    # {'NAME': 'users.validators.SymbolValidator', 'OPTIONS': {'min_digits': 1, } },
+    # {'NAME': 'users.validators.LowercaseValidator', 'OPTIONS': {'min_digits': 8, } },
+    # {'NAME': 'users.validators.UppercaseValidator',  'OPTIONS': {'min_digits': 1, } },
+    # {'NAME': 'users.validators.NumberValidator', 'OPTIONS': {'min_digits': 1, } },
     
     
 

@@ -16,6 +16,7 @@ class Trading(models.Model):
 # extend django's Users model and add any other fields you want to it
 
 
+
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     friends = models.ForeignKey(Friend_List , on_delete= models.CASCADE , blank=True , null = True)
