@@ -266,4 +266,29 @@ h5 {
 }
 
 
+@media screen and (max-width: 991px) {
+  nav.navbar.navbar-expand-lg.navbar-dark.primary-color {
+  background: #000;
+  z-index: 1060;
+  }
+  
+  form#ad-form input {
+  width: 100%;
+  }
+  
+  .inbox-wrapper .inbox-dropdown {
+  margin: 0 auto;
+  margin-top: 60px;
+  width: 550px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  z-index: 1;
+  height: 300px;
+  }
+  }
+
 

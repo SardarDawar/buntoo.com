@@ -3,16 +3,8 @@ const inboxDropDown = document.getElementById('InboxDropdown');
 const backDrop = document.getElementById('backdrop');
 const inboxWrapper = document.querySelector('.inbox-wrapper');
 console.log(inboxButton, inboxDropDown);
-function getMessageById(message) {
-    id = JSON.parse(message).message
-    $.getJSON(`api/messages`, function (data) {
-        if (data.user === currentRecipient ||
-            (data.recipient === currentRecipient && data.user == currentUser)) {
-            drawMessage(data);
-        }
-        messageList.animate({scrollTop: messageList.prop('scrollHeight')});
-    });
-}
+
+
 inboxButton.addEventListener('click', (event) => {
 	event.preventDefault();
 	if (inboxWrapper.style.opacity === '1') {
@@ -25,14 +17,13 @@ inboxButton.addEventListener('click', (event) => {
 });
 
 document.querySelector('.main-body').addEventListener('click', () => {
-	console.log('here');
-	inboxWrapper.style.opacity = '0';
+	if (!event.target.classList.contains('send-message-btn')) {
+		inboxWrapper.style.opacity = '0';
+	}
 })
 function showInbox(event) {
 	event.preventDefault();
-	if (inboxWrapper.style.opacity === '0') {
-		inboxWrapper.style.opacity = '1';
-	}
+	inboxWrapper.style.opacity = '1';
 }
 
 
@@ -52,7 +43,7 @@ const backButton = document.getElementById('chatbox-back-btn');
 
 let CHAT_URL;
 let SENDER, RECEIVER;
-function showChatBox(requestUserId, chatUserId) {
+function showChatBox(requestUserId, chatUserId,flag=false) {
 	SENDER = requestUserId;
 	RECEIVER = chatUserId;
 	console.log(requestUserId, chatUserId);
@@ -60,10 +51,14 @@ function showChatBox(requestUserId, chatUserId) {
 
 	// UI 
 	showInbox(event);
+	console.log('--------------------');
 	if (event.target.classList.contains('chat-profile')) {
 		chatBox.style.display = 'block';
 	} else if (event.target.parentElement.classList.contains('chat-profile')) {
 		chatBox.style.display = 'block';	
+	}
+	if (flag) {
+		chatBox.style.display = 'block';
 	}
 	const messagesOutputElement = document.querySelector('.chat-messages');
 	messagesOutputElement.innerHTML = '<div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div>';
@@ -103,7 +98,26 @@ function showMessages({ messages }) {
 // Sending messages
 const sendMessageButton = document.getElementById('send-msg-btn');
 
-var socket = new WebSocket('ws://' + window.location.host +'/ws?session_key=${sessionKey}');
+
+var loc = window.location;
+var wsStart = 'ws://';
+if (loc.protocol == 'https:') {
+	wsStart = 'wss://'
+}
+
+var socket = new WebSocket(wsStart + window.location.host +'/ws?session_key=${sessionKey}');
+
+socket.onerror = function(e){
+	console.log("erro",e);
+}
+
+socket.onopen = function(e){
+	console.log("real time chat",e);
+}
+
+socket.onclose = function(e){
+	console.log("real time chat ",e);
+}
 
 
 socket.onmessage = function(e) {
@@ -113,7 +127,7 @@ socket.onmessage = function(e) {
 		const messagesOutputElement = document.querySelector('.chat-messages');
 		messagesOutputElement.innerHTML += `
 		<div class='card chat-message'>
-		<b>${data.receiver} </b>
+		<b>${data.sender} </b>
 		<p>${data.message}</p>
 		</div>`;
 		$.notify("You received new messages!",data.receiver);
