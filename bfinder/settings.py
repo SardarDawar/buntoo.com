@@ -31,7 +31,7 @@ SECRET_KEY = 'jmwxa26jd#cju^%x+8ydw*1po$-bpb@y5y^qwy46gj&6_1*du%'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['blockfinder.herokuapp.com',
+ALLOWED_HOSTS = ['buntoo.com','blockfinder.herokuapp.com',
                  'blockfinderinc.com', 'www.blockfinderinc.com', '127.0.0.1', 'localhost']
 
 
@@ -107,24 +107,24 @@ WSGI_APPLICATION = 'bfinder.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
-
 # DATABASES = {
-#    'default': {
-#        'ENGINE': 'django.db.backends.mysql',
-#        'NAME': 'defaultdb',
-#        'USER': 'doadmin',
-#        'PASSWORD':'u02pume6b1taqfoj',
-#        'HOST':'clouddatabase-do-user-7851294-0.a.db.ondigitalocean.com',
-#        'PORT':'25060'
-
-#  }
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
 # }
+
+DATABASES = {
+   'default': {
+       'ENGINE': 'django.db.backends.mysql',
+       'NAME': 'defaultdb',
+       'USER': 'doadmin',
+       'PASSWORD':'u02pume6b1taqfoj',
+       'HOST':'clouddatabase-do-user-7851294-0.a.db.ondigitalocean.com',
+       'PORT':'25060'
+
+ }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
