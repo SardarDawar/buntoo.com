@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from .models import *  # import model so you can display the data in a view
 from users.models import *
 from django.contrib import messages
+from chat.models import Message
 # import stops user from accessing routes if their not logged in
 from django.contrib.auth.decorators import login_required
 from django.contrib import admin
@@ -86,6 +87,9 @@ def home_page(request):
         posts_sorted.append(i)
 
     posts = sorted(list(chain(posts_sorted)),key= lambda instance:instance.date_posted)[::-1]
+   
+    ############################################
+
     all_ads = advert.objects.all()
     alist = {}
 
@@ -375,6 +379,7 @@ from rest_framework import generics
 from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
 
+# *********** Profile Detail *********
 class ProfileViewset(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
@@ -387,6 +392,7 @@ class ProfileDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
 
+# ********* Post Api *****************
 class PostViewset(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
@@ -395,12 +401,39 @@ class PostViewset(viewsets.ModelViewSet):
 
 
 class PostDetail(generics.RetrieveUpdateDestroyAPIView):
-    # lookup_field = 'author'
-    # lookup_url_kwarg = 'user_name'
     queryset = Post.objects.all()
     serializer_class = PostSerializer
 
 
+@csrf_exempt
+def posts_list(request):
+        if request.method == 'GET':
+            current = []
+        current_user = Post.objects.filter(author=request.user)
+        for i in current_user:
+            current.append(i)
+        posts = []
+        user_profile = Profile.objects.get(user=request.user)
+        try:
+            friends = user_profile.friends.friend_name.all() 
+            for i in friends:
+                posts.append(Post.objects.filter(author=i).order_by('-date_posted'))
+            posts_sorted=[]
+            for i in posts:
+                for j in i:
+                    posts_sorted.append(j) 
+        except :
+            posts=[]
+            posts_sorted=[]
+        for i in current_user:
+            posts_sorted.append(i)
+        posts = sorted(list(chain(posts_sorted)),key= lambda instance:instance.date_posted)[::-1]
+
+        print(posts)
+        serializer = PostSerializer(posts, many=True, context={'request': request})
+        return JsonResponse(data = {"Posts": serializer.data}, status = 200)
+
+# *********** Friends Api **************
 class FriendViewset(viewsets.ModelViewSet):
     queryset = Friend_List.objects.all()
     serializer_class = FriendSerializer
@@ -413,11 +446,25 @@ class FriendListDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = FriendSerializer
     queryset = Friend_List.objects.all()
 
+# ************** Search Api ***************
 
 class SearchAPIView(generics.ListCreateAPIView):
-    search_fields = ['username']
+    search_fields = ['user__username']
     filter_backends = (filters.SearchFilter,)
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+    queryset = Friend_List.objects.all()
+    serializer_class = FriendSerializer
 
 
+#**************** Message Api ***************
+
+class ChatAPIView(generics.ListCreateAPIView):
+
+    queryset = Message.objects.all()
+    serializer_class = ChatSerializer
+
+class ChatDetail(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = ChatSerializer
+    queryset = Message.objects.all()
+
+    
+  

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import *
 from users.models import *
+from chat.models import Message
 from django.contrib.auth.models import User
 
 
@@ -27,15 +28,6 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = ("id",'user','user_name','friends',"image")
     
 
-# class ProfileDetailSerializer(serializers.ModelSerializer):
-#     user_name = serializers.ReadOnlyField(source='user.username')
-#     friend_name = FriendRelatedField(
-#             queryset=User.objects.all(),
-#             many=True
-#         )
-#     class Meta:
-#         model = Profile
-#         fields = ("id",'user','user_name','friend_name',"image")
 
 class PostSerializer(serializers.ModelSerializer):
     author_name = serializers.ReadOnlyField(source='author.username')
@@ -48,8 +40,6 @@ class FriendNameSerializer(serializers.ModelSerializer):
         model = User
         fields = ['username']
 
-
-
 class FriendSerializer(serializers.ModelSerializer):
     friend_name = FriendRelatedField(
             queryset=User.objects.all(),
@@ -59,3 +49,10 @@ class FriendSerializer(serializers.ModelSerializer):
     class Meta:
         model = Friend_List
         fields = ['id','user','user_name','friend_name']
+    
+
+class ChatSerializer(serializers.ModelSerializer):
+    # author_name = serializers.ReadOnlyField(source='author.username')
+    class Meta:
+        model = Message
+        fields = ['id','sender','receiver','message','timestamp','is_read']

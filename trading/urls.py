@@ -24,6 +24,10 @@ urlpatterns = [
     path('friends/<str:user_name>/', views.FriendListDetail.as_view()),
     path('profiledetail/<str:user>/', views.ProfileDetail.as_view()),
     path('searchapi/', views.SearchAPIView.as_view()),
+    path('chatapi/', views.ChatAPIView.as_view()),
+    path('posts_list/', views.posts_list),
+    path('ChatDetail/<int:pk>/', views.ChatDetail.as_view()),
+    ####### Reference Finder ########################
     path('reference/<int:id>', views.reference, name='reference'),
 ]
 

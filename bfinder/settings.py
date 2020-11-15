@@ -107,24 +107,24 @@ WSGI_APPLICATION = 'bfinder.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#     }
-# }
-
 DATABASES = {
-   'default': {
-       'ENGINE': 'django.db.backends.mysql',
-       'NAME': 'defaultdb',
-       'USER': 'doadmin',
-       'PASSWORD':'u02pume6b1taqfoj',
-       'HOST':'clouddatabase-do-user-7851294-0.a.db.ondigitalocean.com',
-       'PORT':'25060'
-
- }
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
 }
+
+# DATABASES = {
+#    'default': {
+#        'ENGINE': 'django.db.backends.mysql',
+#        'NAME': 'defaultdb',
+#        'USER': 'doadmin',
+#        'PASSWORD':'u02pume6b1taqfoj',
+#        'HOST':'clouddatabase-do-user-7851294-0.a.db.ondigitalocean.com',
+#        'PORT':'25060'
+
+#  }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
@@ -201,7 +201,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'futuresoftcode@gmail.com'
-EMAIL_HOST_PASSWORD = 'colemantylan@yahoo.com'
+EMAIL_HOST_PASSWORD = 'Sul@03228435921'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 #-------------------------------------------------------------------------
