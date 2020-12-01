@@ -70,7 +70,7 @@ def home_page(request):
     posts = []
     user_profile = Profile.objects.get(user=request.user)
     try:
-        friends = user_profile.friends.friend_name.all() 
+        friends = Friend_List.objects.get(user=request.user).friend_name.all() 
         
         for i in friends:
             posts.append(Post.objects.filter(author=i).order_by('-date_posted'))
@@ -180,8 +180,6 @@ def search(request):
         friend_list = Friend_List.objects.get(user=request.user).friend_name.all(),
     except ObjectDoesNotExist:
         friend_list = None
-
-
     ############################################
     action = request.POST.get('action')
 
@@ -239,8 +237,6 @@ def Friendlist(request):
         pro=Profile.objects.get(user=request.user)
         pro.friends=instance
         pro.save()
-     
-        print('success')
         instance.friend_name.add(name)
 
     context = {
@@ -407,22 +403,35 @@ class PostDetail(generics.RetrieveUpdateDestroyAPIView):
 
 @csrf_exempt
 def posts_list(request):
-        if request.method == 'GET':
-            current = []
+      
+        print(request.method)
+        current = []
         current_user = Post.objects.filter(author=request.user)
+     
+
         for i in current_user:
             current.append(i)
         posts = []
         user_profile = Profile.objects.get(user=request.user)
+        print('###### USER PROFILE #########')
+        print(user_profile)
+
         try:
-            friends = user_profile.friends.friend_name.all() 
+            friends = Friend_List.objects.get(user=request.user).friend_name.all() 
+            print('#############')
+            print(friends)
+            print('TRY BLOCK')
             for i in friends:
                 posts.append(Post.objects.filter(author=i).order_by('-date_posted'))
+                print('#############')
+                print(i)
+                print('#############')
             posts_sorted=[]
             for i in posts:
                 for j in i:
                     posts_sorted.append(j) 
-        except :
+        except Exception as e:
+            print(e)
             posts=[]
             posts_sorted=[]
         for i in current_user:

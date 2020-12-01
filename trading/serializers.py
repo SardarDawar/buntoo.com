@@ -33,22 +33,25 @@ class PostSerializer(serializers.ModelSerializer):
     author_name = serializers.ReadOnlyField(source='author.username')
     class Meta:
         model = Post
-        fields = ['id','author','author_name','img','video','content','date_posted']
+        fields = ['id','author','author_name',"author_image",'img','video','content','date_posted']
 
-class FriendNameSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['username']
+# class FriendNameSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         fields = ['username']
 
 class FriendSerializer(serializers.ModelSerializer):
     friend_name = FriendRelatedField(
             queryset=User.objects.all(),
             many=True
         )
+    # friend_name = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), many=True)
+
     user_name = serializers.ReadOnlyField(source='user.username')
     class Meta:
         model = Friend_List
         fields = ['id','user','user_name','friend_name']
+     
     
 
 class ChatSerializer(serializers.ModelSerializer):
@@ -56,3 +59,4 @@ class ChatSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = ['id','sender','receiver','message','timestamp','is_read']
+

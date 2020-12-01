@@ -31,15 +31,22 @@ class Friend_List(models.Model):
     def __str__(self):
         return self.user.username
 
+from users.models import Profile
+
 # Create your models here.
 class Post(models.Model):
     # title = models.CharField(max_length=254)
     img = models.ImageField(blank=True,upload_to='post_images')
+    author_image = models.ImageField(blank=True,upload_to='post_images')
     video = models.FileField(blank=True,upload_to='post_videos')
     content = models.TextField(blank=True)
     date_posted = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    def save(self, *args, **kwargs):
+        user = Profile.objects.get(user=self.author)
+        self.author_image = user.image
+        super(Post, self).save(*args, **kwargs)
 
     
     def __str__(self):
