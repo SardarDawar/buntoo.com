@@ -28,7 +28,6 @@ incremental==17.5.0
 Markdown==3.2.1
 msgpack==0.6.2
 multitasking==0.0.9
-mysqlclient==1.4.6
 numpy==1.18.4
 pandas==1.0.3
 Pillow==7.1.2

@@ -4,6 +4,8 @@ register = template.Library()
 
 @register.filter('profilefilter')
 def profile(value,id):
-    
-    instance  =  Profile.objects.get(user=id)
-    return instance.image
+    try:
+        instance  =  Profile.objects.get(user=id)
+        return instance.image
+    except:
+        return None
