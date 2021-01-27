@@ -31,7 +31,7 @@ SECRET_KEY = 'jmwxa26jd#cju^%x+8ydw*1po$-bpb@y5y^qwy46gj&6_1*du%'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['buntoo.com','blockfinder.herokuapp.com',
+ALLOWED_HOSTS = ['buntoo.com',"64.227.7.208",'blockfinder.herokuapp.com',
                  'blockfinderinc.com', 'www.blockfinderinc.com', '127.0.0.1', 'localhost']
 
 
@@ -59,7 +59,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'rest_auth.registration',
-    'django_filters'
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -169,7 +169,10 @@ USE_TZ = True
 ASGI_APPLICATION = "bfinder.routing.application"
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": ['redis://localhost:6379']
+        }
     },
 }
 
@@ -188,7 +191,7 @@ LOGIN_URL = 'login'
 # MEDIA FILES #
 
 # full path to where django will store uploaded files (images, etc.)
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 # public url of the directory, how we access the files through the browser
 MEDIA_URL = '/media/'
@@ -200,8 +203,8 @@ MEDIA_URL = '/media/'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'futuresoftcode@gmail.com'
-EMAIL_HOST_PASSWORD = 'Sul@03228435921'
+EMAIL_HOST_USER = 'testuser@conxr.com'
+EMAIL_HOST_PASSWORD = 'Testing@123'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 #-------------------------------------------------------------------------

@@ -2,28 +2,33 @@ const inboxButton = document.getElementById("inbox-dropdown-btn");
 const inboxDropDown = document.getElementById('InboxDropdown');
 const backDrop = document.getElementById('backdrop');
 const inboxWrapper = document.querySelector('.inbox-wrapper');
-console.log(inboxButton, inboxDropDown);
+// const inboxWrapper = document.getElementsByClassName(".inbox-wrapper");
 
 
-inboxButton.addEventListener('click', (event) => {
+
+inboxButton.addEventListener('click', toggleInbox);
+
+function toggleInbox(event) {
 	event.preventDefault();
-	if (inboxWrapper.style.opacity === '1') {
-		inboxWrapper.style.opacity = '0';
-
+	if (inboxWrapper.style.display === 'block') {
+		inboxWrapper.style.display = 'none';
 	} else {
-		inboxWrapper.style.opacity = '1';
+		inboxWrapper.style.display = 'block';
 	}
+}
 
-});
+
 
 document.querySelector('.main-body').addEventListener('click', () => {
 	if (!event.target.classList.contains('send-message-btn')) {
-		inboxWrapper.style.opacity = '0';
+		inboxWrapper.style.display = 'none';
 	}
 })
+
 function showInbox(event) {
+	console.log('-------------------');
 	event.preventDefault();
-	inboxWrapper.style.opacity = '1';
+	inboxWrapper.style.display = 'block';
 }
 
 
@@ -84,13 +89,21 @@ function showMessages({ messages }) {
 	let output = '';
 	const messagesOutputElement = document.querySelector('.chat-messages');
 	messages.forEach(message => {
+		if (message.sender == currentUser ){
+		output += ` 
+		<div class='card chat-message-sender'>
+			<b>${message.sender} </b>
+			<p>${message.message}</p>
+		</div>`
+		}
+		else{
 		output += `
-
-		<div class='card chat-message'>
+		<div class='card chat-message-receiver'>
 			<b>${message.sender} </b>
 			<p>${message.message}</p>
 		</div>
 		`;
+		}
 	});
 	messagesOutputElement.innerHTML = output;
 }
@@ -105,7 +118,7 @@ if (loc.protocol == 'https:') {
 	wsStart = 'wss://'
 }
 
-var socket = new WebSocket(wsStart + window.location.host +'/ws?session_key=${sessionKey}');
+var socket = new WebSocket(wsStart + window.location.host +'/ws?session_key='+sessionKey);
 
 socket.onerror = function(e){
 	console.log("erro",e);
@@ -126,7 +139,7 @@ socket.onmessage = function(e) {
 	if (data.receiver == currentUser) {
 		const messagesOutputElement = document.querySelector('.chat-messages');
 		messagesOutputElement.innerHTML += `
-		<div class='card chat-message'>
+		<div class='card chat-message-receiver'>
 		<b>${data.sender} </b>
 		<p>${data.message}</p>
 		</div>`;
@@ -147,7 +160,7 @@ sendMessageButton.addEventListener('click', () => {
 			receiver: RECEIVER,
 			message:message
 		}
-		
+		console.log(data);
 		fetch(CHAT_URL, {
 			method: 'POST',
 			headers: { 'Content-type': 'application/json' },
@@ -159,7 +172,7 @@ sendMessageButton.addEventListener('click', () => {
 			if (data.sender === currentUser) {
 				const messagesOutputElement = document.querySelector('.chat-messages');
 				messagesOutputElement.innerHTML += `
-				<div class='card chat-message'>
+				<div class='card chat-message-sender'>
 				<b>${data.sender} </b>
 				<p>${data.message}</p>
 				</div>`;
@@ -178,3 +191,15 @@ sendMessageButton.addEventListener('click', () => {
 });
 
 
+window.onscroll = function() {myFunction()};
+
+var header = document.getElementById("myHeader");
+var sticky = header.offsetTop;
+
+function myFunction() {
+  if (window.pageYOffset > sticky) {
+    header.classList.add("sticky");
+  } else {
+    header.classList.remove("sticky");
+  }
+}

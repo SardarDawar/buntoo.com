@@ -1,24 +1,27 @@
 const inboxButton = document.getElementById("inbox-dropdown-btn");
+let sessionKey = '{{ request.session.session_key }}';
+let currentUser = '{{ request.user.username }}';
 const inboxDropDown = document.getElementById('InboxDropdown');
 const inboxWrapper = document.querySelector('.inbox-wrapper');
+console.log(inboxButton);
 inboxButton.addEventListener('click', toggleInbox);
 
 function toggleInbox(event) {
 	event.preventDefault();
-	if (inboxWrapper.style.opacity === '1') {
-		inboxWrapper.style.opacity = '0';
+	if (inboxWrapper.style.display === 'block') {
+		inboxWrapper.style.display = 'none';
 	} else {
-		inboxWrapper.style.opacity = '1';
+		inboxWrapper.style.display = 'block';
 	}
 }
 function showInbox(event) {
 	event.preventDefault();
-	inboxWrapper.style.opacity = '1';
+	inboxWrapper.style.display = 'block';
 }
 // close the inbox
 document.querySelector('.main-body').addEventListener('click', (event) => {
 	if (!event.target.classList.contains('send-message-btn')) {
-		inboxWrapper.style.opacity = '0';
+		inboxWrapper.style.display = 'none';
 	}
 })
 
@@ -69,19 +72,66 @@ function showMessages({ messages }) {
 	let output = '';
 	const messagesOutputElement = document.querySelector('.chat-messages');
 	messages.forEach(message => {
+		if (message.sender == currentUser ){
+			console.log(message.sender);
+		output += ` 
+		<div class='card chat-message-sender'>
+			<b>${message.sender} </b>
+			<p>${message.message}</p>
+		</div>`
+		}
+		else{
 		output += `
-
-		<div class='card chat-message'>
+		<div class='card chat-message-receiver'>
 			<b>${message.sender} </b>
 			<p>${message.message}</p>
 		</div>
 		`;
+		}
 	});
 	messagesOutputElement.innerHTML = output;
 }
 
 // Sending messages
 const sendMessageButton = document.getElementById('send-msg-btn');
+
+var loc = window.location;
+var wsStart = 'ws://';
+if (loc.protocol == 'https:') {
+	wsStart = 'wss://'
+}
+
+var socket = new WebSocket(wsStart + window.location.host +'/ws?session_key='+sessionKey);
+
+socket.onerror = function(e){
+	console.log("erro",e);
+}
+
+socket.onopen = function(e){
+	console.log("real time chat",e);
+}
+
+socket.onclose = function(e){
+	console.log("real time chat ",e);
+}
+
+
+socket.onmessage = function(e) {
+	const data = JSON.parse(e.data);
+	console.log("real time ",data);
+	if (data.receiver == currentUser) {
+		const messagesOutputElement = document.querySelector('.chat-messages');
+		messagesOutputElement.innerHTML += `
+		<div class='card chat-message-receiver'>
+		<b>${data.sender} </b>
+		<p>${data.message}</p>
+		</div>`;
+		$.notify("You received new messages!",data.receiver);
+
+	}
+
+}
+
 
 sendMessageButton.addEventListener('click', () => {
 	const message = document.getElementById('post-message').value;
@@ -102,7 +152,7 @@ sendMessageButton.addEventListener('click', () => {
 			// add message to the list
 			const messagesOutputElement = document.querySelector('.chat-messages');
 			messagesOutputElement.innerHTML += `
-			<div class='card chat-message'>
+			<div class='card chat-message-sender'>
 			<b>${data.sender} </b>
 			<p>${data.message}</p>
 			</div>
@@ -116,3 +166,7 @@ sendMessageButton.addEventListener('click', () => {
 	}
 });
 
+$(".modal").click(function(ev){
+    if(ev.target != this) return;
+    $('.modal').modal('hide');
+});

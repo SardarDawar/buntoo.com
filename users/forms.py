@@ -12,7 +12,7 @@ class UserRegisterForm(UserCreationForm):
     class Meta:
         model = User
         # form fields used in the order you want them to be used
-        fields = ['username', 'email','password1', 'password2']
+        fields = ['username', 'first_name','last_name','email','password1', 'password2']
 
 
 class UserUpdateForm(forms.ModelForm):

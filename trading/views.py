@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from datetime import datetime,timedelta,timezone
 from .models import *  # import model so you can display the data in a view
 from users.models import *
 from django.contrib import messages
@@ -10,11 +11,14 @@ from .models import Post , advert
 from django.contrib.auth.models import User
 from .forms import PostForm , advertform
 from django.db.models import Q
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.csrf import csrf_exempt
 import json
 import time
 import random
+import math
 #payment gateway
 from bfinder import settings
 import stripe
@@ -24,6 +28,20 @@ import requests
 from django.http import JsonResponse
 from bs4 import BeautifulSoup
 import re
+
+def generateOTP() : 
+  
+    # Declare a digits variable   
+    # which stores all digits  
+    digits = "0123456789"
+    OTP = "" 
+  
+   # length of password can be chaged 
+   # by changing value in range 
+    for i in range(4) : 
+        OTP += digits[math.floor(random.random() * 10)] 
+  
+    return OTP 
 
 # Landing Page
 def landing_page(request):
@@ -69,24 +87,27 @@ def home_page(request):
         current.append(i)
     posts = []
     user_profile = Profile.objects.get(user=request.user)
+    user_follow_post = UserFollowing.objects.filter(user_id=request.user).values_list('following_user_id',flat=True)
+    shared_post = SharedPost.objects.filter(user=request.user).values_list('post_id',flat=True)
+    share_posts = SharedPost.objects.filter(user=request.user)
     try:
-        friends = Friend_List.objects.get(user=request.user).friend_name.all() 
-        
-        for i in friends:
-            posts.append(Post.objects.filter(author=i).order_by('-date_posted'))
+        posts.append(Post.objects.filter(Q(author__in=user_follow_post)|Q(author=request.user)).order_by('-date_posted'))
+        posts.append(Post.objects.filter(Q(sharedpost__user__in=user_follow_post)|Q(sharedpost__user=request.user)).order_by('-sharedpost__create_dated'))
         posts_sorted=[]
         for i in posts:
             for j in i:
                 posts_sorted.append(j) 
+
+        new_post_sorted = list(set(posts_sorted))
+
+        
     except :
            posts=[]
            posts_sorted=[]
- 
 
-    for i in current_user:
-        posts_sorted.append(i)
 
-    posts = sorted(list(chain(posts_sorted)),key= lambda instance:instance.date_posted)[::-1]
+    # import pdb;pdb.set_trace();
+    posts = sorted(list(chain(new_post_sorted)),key= lambda instance:instance.shared_post_time)[::-1]
    
     ############################################
 
@@ -122,7 +143,10 @@ def home_page(request):
         'posts': zip(blist,clist),
         'users': User.objects.all() ,
         'user_list_json': user_list_json,
+        'user_profile':user_profile,
         'userzero':userzero,
+        'shared_posted':shared_post,
+        'shareds':share_posts,
         'form':form,
         'empty': empty,
     }
@@ -168,6 +192,7 @@ def search(request):
         user_list.append(i.username)
     user_list_json=json.dumps(user_list)
     userzero = User.objects.all()[0]
+    
 
     ######################################
     query=request.POST.get('query',None)
@@ -175,44 +200,137 @@ def search(request):
     if query is not None:
         user=user.filter(
         Q(username__icontains=query)
-        )
+        ).exclude(Q(username__icontains=request.user.username))
+    try:
+        user_follow = UserFollowing.objects.filter(user_id=request.user,following_user_id__in=user).values_list('following_user_id',flat=True)
+        print(user_follow)
+    except:
+        user_follow = None
+
     try:
         friend_list = Friend_List.objects.get(user=request.user).friend_name.all(),
     except ObjectDoesNotExist:
         friend_list = None
     ############################################
     action = request.POST.get('action')
+    
 
     if action:
         ids= request.POST.get('id')
         print(ids)
         name = User.objects.get(id=ids)
         try:
-            instance=Friend_List.objects.get(user=request.user)
-            instance.friend_name.add(name)
+            instance=FriendRequest.objects.get(pending_user=name,sending_user=request.user)
+            instance.sent_time = timezone.now()
+            instance.save()
         except ObjectDoesNotExist:
-            instance=Friend_List.objects.create(user=request.user)
-            pro=Profile.objects.get(user=request.user)
-            pro.friends=instance
-            pro.save()
-        
-            print('success')
-            instance.friend_name.add(name)
+            FriendRequest.objects.create(pending_user=name,sending_user=request.user,sent_time=timezone.now())
    
-
     ################################################
-
-
     context={
         'friend_list':friend_list,
-        'user':user,
+        'users':user,
         'query':query,
+        'user_follow':user_follow,
         'user_list_json':user_list_json,
         'userzero':userzero
     }
 
     return render(request,'trading/search.html',context)
 
+
+def friendrequest(request):
+    if request.method == "POST":
+        if request.POST['status'] == 'True':
+            user_id = request.POST['id']
+            accepted_user = FriendRequest.objects.filter(pending_user=request.user,sending_user=user_id).first()
+            request_accepted_user = User.objects.get(id=user_id)
+            try:
+                instance=Friend_List.objects.get(user=request.user)
+                instance.friend_name.add(request_accepted_user)
+                instances=Friend_List.objects.filter(user=request_accepted_user).first()
+                if instances is not None:
+                    instances.friend_name.add(request.user)
+            except ObjectDoesNotExist:
+                instance=Friend_List.objects.create(user=request.user)
+                pro=Profile.objects.get(user=request.user)
+                pro.friends=instance
+                pro.save()
+            
+                print('success')
+                instance.friend_name.add(request_accepted_user)
+                instances=Friend_List.objects.create(user=request_accepted_user)
+                pros=Profile.objects.get(user=user_id)
+                pros.friends=instances
+                pros.save()
+            
+                print('success')
+                instance.friend_name.add(request.user)
+
+            accepted_user.delete()
+            context = {
+                'status':True
+            }
+        else:
+            user_id = request.POST['id']
+            accepted_user = FriendRequest.objects.filter(pending_user=request.user,sending_user=user_id).update(status=True)
+            context = {
+                'status': True
+            }
+        return JsonResponse(context, safe=False)
+
+def forgot_password(request):
+    if request.method == "POST":
+        VerifyOtp.clean()
+        email = request.POST['email']
+        user = User.objects.filter(email=email).first()
+        otp = generateOTP()
+        current_time = timezone.now() + timedelta(minutes=5)
+        VerifyOtp.objects.get_or_create(otp=otp,user=user,expire_time=current_time)
+        to_email = user.email
+        mail_subject = 'Reset your account password.'   
+        context =  {    
+                'user': user,
+                'otp': otp,   
+        }
+        message = render_to_string('trading/reset-password-email.html', context ) 
+        send_mail(mail_subject,message,'testuser@conxr.com', [to_email])
+        context = {
+            'user':user
+        }
+        return render(request,'trading/verifyotp.html',context)
+
+def verifyotp(request):
+    if request.method == "POST":
+        print(request.POST)
+        digit1 = request.POST.get('digit1')
+        digit2 = request.POST.get('digit2')
+        digit3 = request.POST.get('digit3')
+        digit4 = request.POST.get('digit4')
+        otp = digit1+digit2+digit3+digit4
+        try:
+            verify = VerifyOtp.objects.get(otp=otp)
+            context = {
+                'user':verify.user
+            }
+            return render(request,'trading/forgetps.html',context)
+        except:
+            messages.error(request, "Otp is invalid please try again")
+            return render(request,'trading/verifyotp.html')
+
+
+def ResetPassword(request):
+    if request.method == "POST":
+        password = request.POST['password']
+        confirm_password = request.POST['verfiypassword']
+        if password == confirm_password :
+            user = User.objects.get(id=request.POST['user'])
+            user.set_password(password)
+            user.save()
+            return redirect('/')
+        else:
+            messages.error(request, "Password did not match ")
+        
 
 
 @login_required

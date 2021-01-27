@@ -48,7 +48,8 @@ class Message(models.Model):
         notification = {
             'type': 'recieve_group_message',
             'message': '{}'.format(self.message),
-            'receiver': '{}'.format(self.receiver.username)
+            'receiver': '{}'.format(self.receiver.username),
+            'sender':'{}'.format(self.sender.username)
         }
 
         channel_layer = get_channel_layer()

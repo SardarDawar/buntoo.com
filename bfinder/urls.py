@@ -33,6 +33,10 @@ urlpatterns = [
     path('login/', user_views.login, name="login"),
     # path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html'), name="logout"),
     path('logout/', user_views.logout, name='logout'),
+    path('follow/', user_views.AddToFollow, name='add_to_follow'),
+    path('share/', user_views.share, name='share'),
+    path('comments/', user_views.show_comments, name='comments'),
+    path('delete/', user_views.delete, name='delete'),
     path('profile/', user_views.user_profile, name="user_profile"),
     url(r'^Userprofile/(?P<user>\w+)/$', user_views.profile, name="Userprofile"),
        #password Reset URLS.............
